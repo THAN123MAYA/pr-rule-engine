@@ -5,13 +5,11 @@
 This PR delivers a working PR rule engine with one rule in production.
 
 Every time a developer opens a Pull Request, the engine automatically 
-checks the PR title and returns a pass or fail result.
+checks the PR and returns a pass or fail result.
 
-**Rule 1: PR Title Format**
-- PR title must follow this format: `type: description`
-- Valid types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `ci`
-- Valid example: `feat: add login page` ✅
-- Invalid example: `added login page` ❌
+**Current rules:**
+See `rules/` folder for all active rules.
+Each rule file has a header explaining what it checks.
 
 **How it works:**
 ```
@@ -21,7 +19,7 @@ GitHub Actions triggers automatically
        ↓
 runner.py runs all registered rules
        ↓
-rule_pr_title.py checks the title
+Each rule checks the PR
        ↓
 Returns pass ✅ or fail ❌ on the PR
 ```
@@ -30,12 +28,10 @@ Returns pass ✅ or fail ❌ on the PR
 
 ## What it doesn't do
 
-- Does not check branch names
-- Does not check commit messages
-- Does not check PR size
 - Does not check actual code files
 - Does not post a comment on the PR
 - Does not suggest fixes to the developer
+- Does not send notifications
 
 All of these can be added as new rules using the guide in `review-rules.md`.
 
@@ -73,13 +69,13 @@ No other files need to change.
 
 ---
 
-## Files in this PR
+## Files in this project
 
 | File | What it does |
 |---|---|
 | `runner.py` | Runs all rules, extensible registry |
-| `rules/rule_pr_title.py` | Rule 1 — checks PR title format |
-| `tests/test_rules.py` | 16 tests covering pass and fail cases |
+| `rules/` folder | All rule files live here |
+| `tests/test_rules.py` | Tests for all rules |
 | `.github/workflows/pr-rules.yml` | Triggers rule engine on every PR |
 | `review-rules.md` | Guide for adding new rules |
 
@@ -103,11 +99,12 @@ Yes. Here is why:
 ## How to test
 
 **On GitHub:**
-1. Open any PR with title `feat: add something` → sees ✅
-2. Open any PR with title `fixed something` → sees ❌
+1. Open any PR — GitHub Actions runs automatically
+2. Good title → sees ✅
+3. Bad title → sees ❌
 
 **Locally:**
 ```bash
 python -m pytest tests/ -v
 ```
-All 16 tests should pass. ✅
+All tests should pass. ✅
