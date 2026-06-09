@@ -35,16 +35,53 @@ rule_pr_size.py
 
 ---
 
-## Step 2: Copy this into your new file
+## Step 2: Find your pattern
+
+What are you checking?
+
+### PR Title
+| I want the title to... | Copy this pattern |
+|---|---|
+| Start with feat/fix/docs | `^(feat\|fix\|docs\|chore): .+` |
+| Have a ticket number | `[A-Z]+-[0-9]+` |
+| Not be empty | `.+` |
+
+### Branch Name
+| I want the branch to... | Copy this pattern |
+|---|---|
+| Start with feat/ or fix/ | `^(feat\|fix\|chore)/` |
+| Have no spaces | `^\S+$` |
+| Use only lowercase | `^[a-z/\-]+$` |
+
+### Length check
+If you want to check length, replace the pattern section with:
+```python
+if len(title) <= 50:   # change 50 to your limit
+    return {"rule": RULE_NAME, "passed": True,  "message": "✅ Length is good"}
+else:
+    return {"rule": RULE_NAME, "passed": False, "message": "❌ Too long!"}
+```
+
+### Can't find your pattern?
+
+Try in this order:
+
+1. **Ask a teammate** — someone may have done it before
+2. **Search Google** — type: `python regex check if string starts with "your requirement"`
+3. **Test your pattern** — paste it at https://regex101.com — shows instantly if it works!
+
+---
+
+## Step 3: Copy this into your new file
 
 Copy everything below and paste it into your new file:
 
 ```python
-import re
+import re  # re = regex library, used for pattern matching
 
 RULE_NAME = "your-rule-name"
 
-PATTERN = re.compile(r"your-pattern-here")
+PATTERN = re.compile(r"your-pattern-here")  # ← paste your pattern from Step 2 here
 
 def check(pr: dict) -> dict:
     title = pr.get("title", "")
@@ -54,7 +91,7 @@ def check(pr: dict) -> dict:
         return {"rule": RULE_NAME, "passed": False, "message": f"❌ Failed: '{title}'"}
 ```
 
-Now change ONLY these 2 things:
+Change ONLY these 2 things:
 
 **Change 1 — Give your rule a name:**
 ```
@@ -64,20 +101,18 @@ RULE_NAME = "your-rule-name"
            Example: "ticket-number" or "branch-format"
 ```
 
-**Change 2 — Pick your pattern:**
+**Change 2 — Paste your pattern from Step 2:**
 ```
 PATTERN = re.compile(r"your-pattern-here")
                       ↑
-                      Copy a pattern from the cheat sheet below
+                      Paste your pattern here
 ```
 
 ---
 
-## Step 3: Register your rule
+## Step 4: Register your rule
 
-Open `runner.py`.
-
-Find this section:
+Open `runner.py` and find this section:
 ```python
 # add your rule here ↓
 ```
@@ -111,11 +146,9 @@ RULES = [
 
 ---
 
-## Step 4: Add 2 tests
+## Step 5: Add 2 tests
 
-Open `tests/test_rules.py`.
-
-Find the bottom of the file and add these 2 tests:
+Open `tests/test_rules.py` and add these 2 tests at the bottom:
 
 ```python
 def test_YOUR_RULE_passes(self):
@@ -145,9 +178,15 @@ def test_ticket_number_fails(self):
 
 ---
 
-## Step 5: Run the tests
+## Step 6: Check your tests
 
-Open your terminal and type:
+**Option 1 — On GitHub (no setup needed):**
+1. Push your changes to GitHub
+2. Open a Pull Request
+3. GitHub Actions runs tests automatically
+4. See ✅ or ❌ on your PR
+
+**Option 2 — On your computer:**
 ```bash
 python -m pytest tests/ -v
 ```
@@ -156,39 +195,6 @@ You should see:
 ```
 test_YOUR_RULE_passes   PASSED ✅
 test_YOUR_RULE_fails    PASSED ✅
-```
-
-If anything shows FAILED — check your pattern. 🔧
-
----
-
-## Finding your pattern
-
-Answer this question:
-
-**What are you checking?**
-
-### PR Title
-| I want the title to... | Copy this pattern |
-|---|---|
-| Start with feat/fix/docs | `^(feat\|fix\|docs\|chore): .+` |
-| Have a ticket number | `[A-Z]+-[0-9]+` |
-| Not be empty | `.+` |
-
-### Branch Name
-| I want the branch to... | Copy this pattern |
-|---|---|
-| Start with feat/ or fix/ | `^(feat\|fix\|chore)/` |
-| Have no spaces | `^\S+$` |
-| Use only lowercase | `^[a-z/\-]+$` |
-
-### Length check
-If you want to check length, replace the pattern section with:
-```python
-if len(title) <= 50:   # change 50 to your limit
-    return {"rule": RULE_NAME, "passed": True,  "message": "✅ Length is good"}
-else:
-    return {"rule": RULE_NAME, "passed": False, "message": "❌ Too long!"}
 ```
 
 ---
@@ -200,7 +206,7 @@ else:
 | Tests failing | Check your pattern matches your example |
 | Rule not running | Check you added it to RULES list |
 | File not found | Check your file is inside `rules/` folder |
-| Pattern not matching | Copy a pattern from the cheat sheet above |
+| Pattern not matching | Copy a pattern from Step 2 above |
 
 ---
 
@@ -219,13 +225,13 @@ RULES = [
 
 ## Full worked example
 
-Here is a complete example from start to finish.
-
 **Goal:** Check that PR title has a ticket number like `LOGIN-123`
 
 **Step 1** — Create file: `rules/rule_ticket_number.py`
 
-**Step 2** — Paste and fill in:
+**Step 2** — Find pattern: `[A-Z]+-[0-9]+` (from cheat sheet above)
+
+**Step 3** — Paste and fill in:
 ```python
 import re
 
@@ -241,7 +247,7 @@ def check(pr: dict) -> dict:
         return {"rule": RULE_NAME, "passed": False, "message": f"❌ Failed: '{title}'"}
 ```
 
-**Step 3** — Add to `runner.py`:
+**Step 4** — Add to `runner.py`:
 ```python
 from rules.rule_ticket_number import check as rule_ticket_number
 
@@ -251,7 +257,7 @@ RULES = [
 ]
 ```
 
-**Step 4** — Add tests to `test_rules.py`:
+**Step 5** — Add tests:
 ```python
 def test_ticket_number_passes(self):
     result = check(make_pr("feat: LOGIN-123 add login"))
@@ -262,9 +268,4 @@ def test_ticket_number_fails(self):
     assert result["passed"] is False
 ```
 
-**Step 5** — Run tests:
-```bash
-python -m pytest tests/ -v
-```
-
-Done! ✅
+**Step 6** — Push to GitHub and open a PR. Watch GitHub Actions run! ✅
