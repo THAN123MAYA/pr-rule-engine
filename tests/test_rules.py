@@ -87,3 +87,11 @@ class TestRunner:
         assert "rule" in result
         assert "passed" in result
         assert "message" in result
+
+    def test_YOUR_RULE_passes(self):
+        result = check(make_pr("paste a good example here"))
+        assert result["passed"] is True
+
+    def test_YOUR_RULE_fails(self):
+        result = check(make_pr("paste a bad example here"))
+        assert result["passed"] is False
