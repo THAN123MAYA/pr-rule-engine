@@ -5,7 +5,7 @@ RULE_NAME = "branch_name"
 PATTERN = re.compile(r"^(feat|fix|chore)/")  # ← paste your pattern from Step 2 here
 
 def check(pr: dict) -> dict:
-    title = pr.get("title", "")
+    title = pr.get("head", "")
     if PATTERN.match(title):
         return {"rule": RULE_NAME, "passed": True,  "message": f"✅ Passed: '{title}'"}
     else:
