@@ -1,3 +1,4 @@
+# testing bad branch name
 import json
 import sys
 from rules.rule_pr_title import check as rule_pr_title
