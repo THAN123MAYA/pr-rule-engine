@@ -6,6 +6,26 @@ Takes less than 5 minutes. ⏱️
 
 ---
 
+## ⚠️ Common mistakes to avoid
+
+These are the most common things that go wrong. Check these first!
+
+| Mistake | How to avoid |
+|---|---|
+| Wrong branch | Always check which branch you're on before making changes |
+| Wrong folder | Rule files must go inside `rules/` folder — not anywhere else |
+| Wrong file | Double check you opened the right file before editing |
+| Wrong indentation | Every line inside a function needs 1 tab before it |
+| Wrong field | Check the field table in Step 3 — title, head, base, author |
+
+> 💡 **Quick checklist before you start:**
+> - Am I on the right branch? ✅
+> - Am I inside the `rules/` folder? ✅
+> - Did I use the right field name? ✅
+> - Did I indent with Tab? ✅
+
+---
+
 ## Before you start
 
 You will touch exactly 3 files:
@@ -65,16 +85,13 @@ else:
 ### Can't find your pattern?
 
 Try in this order:
-
 1. **Ask a teammate** — someone may have done it before
 2. **Search Google** — type: `python regex check if string starts with "your requirement"`
-3. **Test your pattern** — paste it at https://regex101.com — shows instantly if it works!
+3. **Test your pattern** — paste it at https://regex101.com
 
 ---
 
 ## Step 3: Copy this into your new file
-
-Copy everything below and paste it into your new file:
 
 ```python
 import re  # re = regex library, used for pattern matching
@@ -84,29 +101,29 @@ RULE_NAME = "your-rule-name"
 PATTERN = re.compile(r"your-pattern-here")  # ← paste your pattern from Step 2 here
 
 def check(pr: dict) -> dict:
-    title = pr.get("title", "")
-    if PATTERN.match(title):
-        return {"rule": RULE_NAME, "passed": True,  "message": f"✅ Passed: '{title}'"}
+    value = pr.get("title", "")  # ← change "title" based on what you're checking
+    if PATTERN.match(value):
+        return {"rule": RULE_NAME, "passed": True,  "message": f"✅ Passed: '{value}'"}
     else:
-        return {"rule": RULE_NAME, "passed": False, "message": f"❌ Failed: '{title}'"}
+        return {"rule": RULE_NAME, "passed": False, "message": f"❌ Failed: '{value}'"}
 ```
 
-Change ONLY these 2 things:
+**Change ONLY these 3 things:**
 
-**Change 1 — Give your rule a name:**
-```
-RULE_NAME = "your-rule-name"
-           ↑
-           Change this to describe your rule
-           Example: "ticket-number" or "branch-format"
-```
+| What to change | Where | Example |
+|---|---|---|
+| `"your-rule-name"` | Line 3 | `"branch-name"` |
+| `"your-pattern-here"` | Line 5 | `^(feat\|fix)/` |
+| `"title"` | Line 8 | See table below |
 
-**Change 2 — Paste your pattern from Step 2:**
-```
-PATTERN = re.compile(r"your-pattern-here")
-                      ↑
-                      Paste your pattern here
-```
+**What to put instead of "title":**
+
+| I am checking... | Change "title" to... |
+|---|---|
+| PR title | `"title"` ← keep as is |
+| Branch name | `"head"` |
+| Target branch | `"base"` |
+| PR author | `"author"` |
 
 ---
 
@@ -116,8 +133,6 @@ Open `runner.py` and find this section:
 ```python
 # add your rule here ↓
 ```
-
-Add these 2 lines:
 
 **Line 1 — at the top of the file:**
 ```python
@@ -180,22 +195,19 @@ def test_ticket_number_fails(self):
 
 ## Step 6: Check your tests
 
-**Option 1 — On GitHub (no setup needed):**
-1. Push your changes to GitHub
-2. Open a Pull Request
-3. GitHub Actions runs tests automatically
-4. See ✅ or ❌ on your PR
+**Push your code to GitHub and open a Pull Request.**
 
-**Option 2 — On your computer:**
-```bash
-python -m pytest tests/ -v
+GitHub automatically runs all tests and shows:
+```
+✅ All checks passed   → your rule works!
+❌ Some checks failed  → check your pattern
 ```
 
-You should see:
-```
-test_YOUR_RULE_passes   PASSED ✅
-test_YOUR_RULE_fails    PASSED ✅
-```
+That's it! No installation needed. 😊
+
+> **Only if you want to test locally first:**
+> Install Python from https://python.org/downloads
+> Then run: `python -m pytest tests/ -v`
 
 ---
 
@@ -207,6 +219,7 @@ test_YOUR_RULE_fails    PASSED ✅
 | Rule not running | Check you added it to RULES list |
 | File not found | Check your file is inside `rules/` folder |
 | Pattern not matching | Copy a pattern from Step 2 above |
+| GitHub Actions not triggering | Check `.github/workflows/pr-rules.yml` exists |
 
 ---
 
@@ -269,3 +282,202 @@ def test_ticket_number_fails(self):
 ```
 
 **Step 6** — Push to GitHub and open a PR. Watch GitHub Actions run! ✅
+
+---
+
+## Check these files exist!
+
+Your repo must have ALL of these files to work:
+
+| File | Location | What happens if missing |
+|---|---|---|
+| `runner.py` | root folder | Rules never run |
+| `__init__.py` | inside `rules/` folder | Python can't find rules |
+| `pr-rules.yml` | `.github/workflows/` folder | GitHub Actions never triggers |
+| `tests/test_rules.py` | inside `tests/` folder | Tests can't run |
+
+Your repo must look like this:
+
+```
+your-repo/
+├── 📄 runner.py                    ← must exist!
+├── 📄 review-rules.md              ← this guide
+├── 📁 .github/
+│   └── 📁 workflows/
+│       └── 📄 pr-rules.yml         ← must exist!
+├── 📁 rules/
+│   ├── 📄 __init__.py              ← must exist!
+│   └── 📄 rule_pr_title.py         ← at least one rule
+└── 📁 tests/
+    └── 📄 test_rules.py            ← must exist!
+```
+
+If any file is missing → copy it from the section below! ✅
+
+---
+
+## Setting up a brand new repo from scratch
+
+If you're starting fresh, create all these files first.
+Then follow the guide above to add your own rules.
+
+---
+
+### File 1: `runner.py` (copy exactly)
+
+```python
+"""
+PR Rule Engine — Runner
+───────────────────────
+HOW TO ADD A NEW RULE:
+1. Create a file in /rules folder
+2. Import it below
+3. Add it to the RULES list
+That's it! ✅
+"""
+
+import json
+import sys
+from rules.rule_pr_title import check as rule_pr_title
+
+# ─────────────────────────────────────────
+# RULE REGISTRY
+# Add new rules here ↓
+# ─────────────────────────────────────────
+RULES = [
+    rule_pr_title,
+]
+
+
+def run_all_rules(pr: dict) -> dict:
+    results = []
+    for rule_fn in RULES:
+        result = rule_fn(pr)
+        results.append(result)
+    overall_passed = all(r["passed"] for r in results)
+    return {
+        "passed": overall_passed,
+        "results": results,
+    }
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python runner.py <pr_payload.json>")
+        sys.exit(1)
+    with open(sys.argv[1]) as f:
+        pr_payload = json.load(f)
+    output = run_all_rules(pr_payload)
+    print(json.dumps(output, indent=2))
+    sys.exit(0 if output["passed"] else 1)
+```
+
+---
+
+### File 2: `rules/__init__.py`
+
+Leave this file completely empty. Just create it! ✅
+
+---
+
+### File 3: `.github/workflows/pr-rules.yml` (copy exactly)
+
+```yaml
+name: PR Rule Engine
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+jobs:
+  run-rules:
+    name: Run PR Rules
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Write PR payload
+        run: |
+          cat <<'EOF' > pr_payload.json
+          {
+            "title": "${{ github.event.pull_request.title }}",
+            "number": ${{ github.event.pull_request.number }},
+            "author": "${{ github.event.pull_request.user.login }}",
+            "base": "${{ github.event.pull_request.base.ref }}",
+            "head": "${{ github.event.pull_request.head.ref }}"
+          }
+          EOF
+
+      - name: Run rule engine
+        run: python runner.py pr_payload.json
+```
+
+---
+
+### File 4: `tests/test_rules.py` (copy exactly)
+
+```python
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
+from rules.rule_pr_title import check
+from runner import run_all_rules
+
+
+def make_pr(title):
+    return {"title": title, "number": 1, "author": "test-user"}
+
+
+class TestPRTitleRule:
+
+    def test_feat_title(self):
+        result = check(make_pr("feat: add login page"))
+        assert result["passed"] is True
+
+    def test_fix_title(self):
+        result = check(make_pr("fix: resolve null pointer"))
+        assert result["passed"] is True
+
+    def test_no_type_prefix(self):
+        result = check(make_pr("Added login page"))
+        assert result["passed"] is False
+
+    def test_wip_title(self):
+        result = check(make_pr("WIP"))
+        assert result["passed"] is False
+
+    def test_empty_title(self):
+        result = check(make_pr(""))
+        assert result["passed"] is False
+
+
+class TestRunner:
+
+    def test_runner_passes_valid_pr(self):
+        pr = make_pr("feat: wire rule engine into workflow")
+        output = run_all_rules(pr)
+        assert output["passed"] is True
+
+    def test_runner_fails_invalid_pr(self):
+        pr = make_pr("fixed the bug")
+        output = run_all_rules(pr)
+        assert output["passed"] is False
+```
+
+---
+
+### After creating all files:
+
+1. Push everything to GitHub
+2. Open a PR
+3. Watch GitHub Actions trigger automatically! ✅
+
+Then follow the guide above to add your own rules. 😊
