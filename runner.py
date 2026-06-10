@@ -1,10 +1,12 @@
 import json
 import sys
 from rules.rule_pr_title import check as rule_pr_title
+from rules.rule_branch_name import check as rule_branch_name  # ← add here
 
 
 RULES = [
     rule_pr_title,
+    rule_branch_name,
 ]
 
 
