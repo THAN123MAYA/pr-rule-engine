@@ -37,6 +37,10 @@ def check(pr: dict) -> dict:
             has_start = start_keyword in content_upper
             has_end = end_keyword in content_upper
 
+          # DEBUG: show what we found
+            issues.append(f"DEBUG: {start_keyword}={has_start}, {end_keyword}={has_end}")
+
+
             if has_start and not has_end:
                 issues.append(
                     f"{filename}: found '{start_keyword}' but missing '{end_keyword}'"
