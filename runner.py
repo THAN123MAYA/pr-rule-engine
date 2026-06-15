@@ -3,12 +3,14 @@ import sys
 from rules.rule_pr_title import check as rule_pr_title
 from rules.rule_branch_name import check as rule_branch_name  # ← add here
 from rules.rule_sql_keywords import check as rule_sql_keywords
+from rules.rule_plsql_pairs import check as rule_plsql_pairs
 
 
 RULES = [
     rule_pr_title,
     rule_branch_name,
     rule_sql_keywords,
+    rule_plsql_pairs, 
 ]
 
 
