@@ -1,34 +1,35 @@
-create or replace package pkg_inventory as
-    function get_stock_level(p_item_id in number) return number;
-    procedure update_stock(p_item_id in number, p_quantity in number);
-end pkg_inventory;
+CREATE OR REPLACE PACKAGE pkg_inventory AS
+    FUNCTION get_stock_level(p_item_id IN NUMBER) RETURN NUMBER;
+    PROCEDURE update_stock(p_item_id IN NUMBER, p_quantity IN NUMBER);
+END pkg_inventory;
 /
 
-create or replace package body pkg_inventory as
+CREATE OR REPLACE PACKAGE BODY pkg_inventory AS
 
-    function get_stock_level(p_item_id in number) return number is
-        v_stock number;
-    begin
-        select stock_qty into v_stock
-        from inventory
-        where item_id = p_item_id;
+    FUNCTION get_stock_level(p_item_id IN NUMBER) RETURN NUMBER IS
+        v_stock NUMBER;
+    BEGIN
+        SELECT stock_qty INTO v_stock
+        FROM inventory
+        WHERE item_id = p_item_id;
 
         -- BUG: missing RETURN statement!
-    end get_stock_level;
 
-    procedure update_stock(p_item_id in number, p_quantity in number) is
-    begin
-        if p_quantity > 0 then
-            update inventory
-            set stock_qty = stock_qty + p_quantity
-            where item_id = p_item_id;
+    END get_stock_level;
+
+    PROCEDURE update_stock(p_item_id IN NUMBER, p_quantity IN NUMBER) IS
+    BEGIN
+        IF p_quantity > 0 THEN
+            UPDATE inventory
+            SET stock_qty = stock_qty + p_quantity
+            WHERE item_id = p_item_id;
 
             -- BUG: missing END IF!
 
-        update inventory
-        set last_updated = sysdate
-        where item_id = p_item_id;
-    end update_stock;
+        UPDATE inventory
+        SET last_updated = SYSDATE
+        WHERE item_id = p_item_id;
+    END update_stock;
 
-end pkg_inventory;
+END pkg_inventory;
 /
