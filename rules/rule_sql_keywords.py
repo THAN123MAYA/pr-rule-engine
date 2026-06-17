@@ -12,64 +12,15 @@ import re
 
 RULE_NAME = "sql-keyword-case"
 
-# ─────────────────────────────────────────
-# KEYWORDS LIST
-# Add or remove keywords here. No code knowledge needed!
-# ─────────────────────────────────────────
 KEYWORDS = [
-    "SELECT",
-    "FROM",
-    "WHERE",
-    "INSERT",
-    "INTO",
-    "VALUES",
-    "UPDATE",
-    "SET",
-    "DELETE",
-    "CREATE",
-    "TABLE",
-    "ALTER",
-    "DROP",
-    "JOIN",
-    "INNER",
-    "LEFT",
-    "RIGHT",
-    "OUTER",
-    "ON",
-    "AND",
-    "OR",
-    "NOT",
-    "IN",
-    "AS",
-    "ORDER",
-    "BY",
-    "GROUP",
-    "HAVING",
-    "LIMIT",
-    "DISTINCT",
-    "COUNT",
-    "SUM",
-    "AVG",
-    "MAX",
-    "MIN",
-    "NULL",
-    "IS",
-    "LIKE",
-    "BETWEEN",
-    "UNION",
-    "EXISTS",
-    "CASE",
-    "WHEN",
-    "THEN",
-    "ELSE",
-    "END",
-    "PRIMARY",
-    "KEY",
-    "FOREIGN",
-    "REFERENCES",
-    "DEFAULT",
-    "UNIQUE",
-    "INDEX",
+    "SELECT", "FROM", "WHERE", "INSERT", "INTO", "VALUES", "UPDATE",
+    "SET", "DELETE", "CREATE", "TABLE", "ALTER", "DROP", "JOIN",
+    "INNER", "LEFT", "RIGHT", "OUTER", "ON", "AND", "OR", "NOT", "IN",
+    "AS", "ORDER", "BY", "GROUP", "HAVING", "LIMIT", "DISTINCT",
+    "COUNT", "SUM", "AVG", "MAX", "MIN", "NULL", "IS", "LIKE",
+    "BETWEEN", "UNION", "EXISTS", "CASE", "WHEN", "THEN", "ELSE",
+    "END", "PRIMARY", "KEY", "FOREIGN", "REFERENCES", "DEFAULT",
+    "UNIQUE", "INDEX",
 ]
 
 
@@ -84,12 +35,12 @@ def check(pr: dict) -> dict:
         lines = content.split("\n")
         for line_number, line in enumerate(lines, start=1):
             for keyword in KEYWORDS:
-                # check if lowercase version of keyword exists
                 pattern = r"\b" + keyword.lower() + r"\b"
                 if re.search(pattern, line):
                     issues.append(
-                        f"{filename} line {line_number}: "
-                        f"'{keyword.lower()}' should be '{keyword}'"
+                        f"  Line {line_number}: '{keyword.lower()}' should be '{keyword}'\n"
+                        f"  Found in: '{line.strip()}'\n"
+                        f"  Fix: Change '{keyword.lower()}' to '{keyword}'"
                     )
 
     if not issues:
@@ -102,5 +53,8 @@ def check(pr: dict) -> dict:
         return {
             "rule": RULE_NAME,
             "passed": False,
-            "message": "❌ Found " + str(len(issues)) + " issue(s):\n" + "\n".join(issues),
+            "message": (
+                f"❌ SQL Keyword Case — Found {len(issues)} issue(s):\n\n" +
+                "\n\n".join(issues)
+            ),
         }
