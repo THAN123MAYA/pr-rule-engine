@@ -1,0 +1,16 @@
+CREATE OR REPLACE FUNCTION get_salary (
+    emp_id NUMBER
+)
+RETURN NUMBER
+IS
+    v_salary NUMBER;
+BEGIN
+    SELECT salary
+    INTO v_salary
+    FROM employees
+    WHERE employee_id = emp_id;
+
+    -- Missing RETURN statement here
+
+END;
+/
