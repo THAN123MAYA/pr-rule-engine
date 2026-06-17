@@ -6,21 +6,19 @@ What it checks: Matching keyword pairs in PL/SQL code
 Valid pairs:
   FUNCTION ... must have ... RETURN
   IF ... must have ... END IF
-  BEGIN ... must have ... END
+  LOOP ... must have ... END LOOP
+  CASE ... must have ... END CASE
 
 To add more pairs: add them to the PAIRS list below
 """
 
 RULE_NAME = "plsql-structure-pairs"
 
-# ─────────────────────────────────────────
-# PAIRS LIST
-# Format: (starting_keyword, required_ending_keyword)
-# ─────────────────────────────────────────
 PAIRS = [
     ("FUNCTION", "RETURN"),
-    ("IF", "END IF"),
-    ("BEGIN", "END"),
+    ("IF",       "END IF"),
+    ("LOOP",     "END LOOP"),
+    ("CASE",     "END CASE"),
 ]
 
 
@@ -37,24 +35,26 @@ def check(pr: dict) -> dict:
             has_start = start_keyword in content_upper
             has_end = end_keyword in content_upper
 
-          # DEBUG: show what we found
-            issues.append(f"DEBUG: {start_keyword}={has_start}, {end_keyword}={has_end}")
-
-
             if has_start and not has_end:
                 issues.append(
-                    f"{filename}: found '{start_keyword}' but missing '{end_keyword}'"
+                    f"  File: {filename}\n"
+                    f"  Found: '{start_keyword}' block\n"
+                    f"  Missing: '{end_keyword}'\n"
+                    f"  Fix: Every '{start_keyword}' block must end with '{end_keyword}'"
                 )
 
     if not issues:
         return {
             "rule": RULE_NAME,
             "passed": True,
-            "message": "✅ All structure pairs are correctly matched",
+            "message": "✅ All PL/SQL structure pairs are correctly matched",
         }
     else:
         return {
             "rule": RULE_NAME,
             "passed": False,
-            "message": "❌ Found " + str(len(issues)) + " issue(s):\n" + "\n".join(issues),
+            "message": (
+                f"❌ PL/SQL Structure Pairs — Found {len(issues)} issue(s):\n\n" +
+                "\n\n".join(issues)
+            ),
         }
