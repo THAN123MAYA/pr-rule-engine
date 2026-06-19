@@ -17,12 +17,14 @@ These are the most common things that go wrong. Check these first!
 | Wrong file | Double check you opened the right file before editing |
 | Wrong indentation | Every line inside a function needs 1 tab before it |
 | Wrong field | Check the field table in Step 3 — title, head, base, author |
+| Wrong template | Two templates exist — check Step 3 vs Step 3B below |
 
 > 💡 **Quick checklist before you start:**
 > - Am I on the right branch? ✅
 > - Am I inside the `rules/` folder? ✅
 > - Did I use the right field name? ✅
 > - Did I indent with Tab? ✅
+> - Am I using the right template (3 or 3B)? ✅
 
 ---
 
@@ -40,6 +42,15 @@ You do NOT need to touch anything else. ✅
 
 ---
 
+## Which kind of rule are you building?
+
+| I am checking... | Use |
+|---|---|
+| PR title, branch name, author, target branch (one single value) | Step 3 template |
+| Actual code inside files — file size, keyword case, comments | Step 3B template |
+
+---
+
 ## Step 1: Create your rule file
 
 1. Go to the `rules/` folder
@@ -50,12 +61,12 @@ Examples of good names:
 ```
 rule_branch_name.py
 rule_ticket_number.py
-rule_pr_size.py
+rule_file_size.py
 ```
 
 ---
 
-## Step 2: Find your pattern
+## Step 2: Find your pattern (only needed for Step 3 template)
 
 What are you checking?
 
@@ -73,6 +84,11 @@ What are you checking?
 | Have no spaces | `^\S+$` |
 | Use only lowercase | `^[a-z/\-]+$` |
 
+### File-level checks
+| I want to check... | Copy this pattern |
+|---|---|
+| File starts with author comment | `^--\s*AUTHOR:\s*.+` |
+
 ### Length check
 If you want to check length, replace the pattern section with:
 ```python
@@ -81,6 +97,16 @@ if len(title) <= 50:   # change 50 to your limit
 else:
     return {"rule": RULE_NAME, "passed": False, "message": "❌ Too long!"}
 ```
+
+### Logic-based checks (no pattern needed!)
+
+Not every rule needs a regex pattern. Some rules check numbers or conditions instead.
+
+| I want to check... | Use this logic instead of a pattern |
+|---|---|
+| File line count | `len(content.split("\n")) > 50` |
+| File is not empty | `len(content.strip()) == 0` |
+| Number of files changed | `len(files) > 10` |
 
 ### Can't find your pattern?
 
@@ -91,7 +117,9 @@ Try in this order:
 
 ---
 
-## Step 3: Copy this into your new file
+## Step 3: Copy this template — single value checks
+
+Use this template when checking ONE value: PR title, branch name, author, or target branch.
 
 ```python
 import re  # re = regex library, used for pattern matching
@@ -127,6 +155,114 @@ def check(pr: dict) -> dict:
 
 ---
 
+## Step 3B: Copy this template — file-checking rules
+
+Use this template when checking the ACTUAL CODE FILES changed in the PR — like file size, keyword case, or comment headers.
+
+```python
+"""
+RULE: Your Rule Name
+─────────────────────
+What it checks: describe what this checks
+Valid example:   ...    ✅
+Invalid example: ...    ❌
+"""
+
+RULE_NAME = "your-rule-name"
+
+
+def check(pr: dict) -> dict:
+    files = pr.get("files", [])
+    issues = []
+
+    for file in files:
+        filename = file.get("filename", "")
+        content = file.get("content", "")
+
+        # ↓ YOUR CHECK GOES HERE ↓
+        # Example: check something about content or filename
+        # if SOMETHING_WRONG:
+        #     issues.append(f"{filename}: describe the problem")
+
+    if not issues:
+        return {
+            "rule": RULE_NAME,
+            "passed": True,
+            "message": "✅ All files passed this check",
+        }
+    else:
+        return {
+            "rule": RULE_NAME,
+            "passed": False,
+            "message": (
+                f"❌ Found {len(issues)} issue(s):\n\n" + "\n\n".join(issues)
+            ),
+        }
+```
+
+**Change ONLY these 2 things:**
+
+| What to change | Where |
+|---|---|
+| `"your-rule-name"` | Top of file |
+| The check logic inside the `for` loop | Replace the commented placeholder |
+
+### Worked example — File Size Limit
+
+```python
+RULE_NAME = "file-size-limit"
+
+def check(pr: dict) -> dict:
+    files = pr.get("files", [])
+    issues = []
+
+    for file in files:
+        filename = file.get("filename", "")
+        content = file.get("content", "")
+        line_count = len(content.split("\n"))
+
+        if line_count > 50:
+            issues.append(f"{filename}: {line_count} lines (limit is 50)")
+
+    if not issues:
+        return {"rule": RULE_NAME, "passed": True, "message": "✅ All files within limit"}
+    else:
+        return {"rule": RULE_NAME, "passed": False, "message": "❌ " + "\n\n".join(issues)}
+```
+
+### Worked example — Author Comment Header
+
+```python
+import re
+
+RULE_NAME = "author-comment-header"
+
+PATTERN = re.compile(r"^--\s*AUTHOR:\s*.+", re.IGNORECASE)
+
+def check(pr: dict) -> dict:
+    files = pr.get("files", [])
+    issues = []
+
+    for file in files:
+        filename = file.get("filename", "")
+        content = file.get("content", "")
+
+        if not filename.endswith(".sql"):
+            continue
+
+        first_line = content.split("\n")[0] if content else ""
+
+        if not PATTERN.match(first_line):
+            issues.append(f"{filename}: missing '-- AUTHOR: name' as first line")
+
+    if not issues:
+        return {"rule": RULE_NAME, "passed": True, "message": "✅ All SQL files have an author comment"}
+    else:
+        return {"rule": RULE_NAME, "passed": False, "message": "❌ " + "\n\n".join(issues)}
+```
+
+---
+
 ## Step 4: Register your rule
 
 Open `runner.py` and find this section:
@@ -149,13 +285,13 @@ RULES = [
 
 Replace `YOUR_FILE_NAME` with your actual file name.
 
-Example — if your file is `rule_ticket_number.py`:
+Example — if your file is `rule_file_size.py`:
 ```python
-from rules.rule_ticket_number import check as rule_ticket_number
+from rules.rule_file_size import check as rule_file_size
 
 RULES = [
     rule_pr_title,
-    rule_ticket_number,
+    rule_file_size,
 ]
 ```
 
@@ -220,6 +356,7 @@ That's it! No installation needed. 😊
 | File not found | Check your file is inside `rules/` folder |
 | Pattern not matching | Copy a pattern from Step 2 above |
 | GitHub Actions not triggering | Check `.github/workflows/pr-rules.yml` exists |
+| Rule always passes/fails unexpectedly | Check you used the right template (3 vs 3B) |
 
 ---
 
@@ -236,7 +373,7 @@ RULES = [
 
 ---
 
-## Full worked example
+## Full worked example — Step 3 template
 
 **Goal:** Check that PR title has a ticket number like `LOGIN-123`
 
@@ -295,12 +432,14 @@ Your repo must have ALL of these files to work:
 | `__init__.py` | inside `rules/` folder | Python can't find rules |
 | `pr-rules.yml` | `.github/workflows/` folder | GitHub Actions never triggers |
 | `tests/test_rules.py` | inside `tests/` folder | Tests can't run |
+| `build_payload.py` | root folder | File-checking rules (Step 3B) get no file content |
 
 Your repo must look like this:
 
 ```
 your-repo/
 ├── 📄 runner.py                    ← must exist!
+├── 📄 build_payload.py             ← must exist! (needed for Step 3B rules)
 ├── 📄 review-rules.md              ← this guide
 ├── 📁 .github/
 │   └── 📁 workflows/
@@ -380,7 +519,53 @@ Leave this file completely empty. Just create it! ✅
 
 ---
 
-### File 3: `.github/workflows/pr-rules.yml` (copy exactly)
+### File 3: `build_payload.py` (copy exactly — needed for file-checking rules)
+
+```python
+"""
+Builds the PR payload including file contents.
+This runs inside GitHub Actions before the rule engine.
+"""
+
+import sys
+import json
+import os
+
+
+def main():
+    files_string = sys.argv[1]
+    filenames = [f for f in files_string.split(",") if f]
+
+    files_data = []
+    for filename in filenames:
+        if os.path.exists(filename):
+            with open(filename, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+            files_data.append({
+                "filename": filename,
+                "content": content,
+            })
+
+    payload = {
+        "title": os.environ.get("PR_TITLE", ""),
+        "number": os.environ.get("PR_NUMBER", ""),
+        "author": os.environ.get("PR_AUTHOR", ""),
+        "base": os.environ.get("PR_BASE", ""),
+        "head": os.environ.get("PR_HEAD", ""),
+        "files": files_data,
+    }
+
+    with open("pr_payload.json", "w") as f:
+        json.dump(payload, f, indent=2)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+### File 4: `.github/workflows/pr-rules.yml` (copy exactly)
 
 ```yaml
 name: PR Rule Engine
@@ -397,23 +582,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Write PR payload
+      - name: Get changed files
+        id: changed-files
         run: |
-          cat <<'EOF' > pr_payload.json
-          {
-            "title": "${{ github.event.pull_request.title }}",
-            "number": ${{ github.event.pull_request.number }},
-            "author": "${{ github.event.pull_request.user.login }}",
-            "base": "${{ github.event.pull_request.base.ref }}",
-            "head": "${{ github.event.pull_request.head.ref }}"
-          }
-          EOF
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+          echo "files=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...HEAD | tr '\n' ',')" >> $GITHUB_OUTPUT
+
+      - name: Build PR payload
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+        run: |
+          python build_payload.py "${{ steps.changed-files.outputs.files }}"
 
       - name: Run rule engine
         run: python runner.py pr_payload.json
@@ -421,7 +612,7 @@ jobs:
 
 ---
 
-### File 4: `tests/test_rules.py` (copy exactly)
+### File 5: `tests/test_rules.py` (copy exactly)
 
 ```python
 import sys
