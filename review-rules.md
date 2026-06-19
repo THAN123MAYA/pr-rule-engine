@@ -206,6 +206,16 @@ def check(pr: dict) -> dict:
 |---|---|
 | `"your-rule-name"` | Top of file |
 | The check logic inside the `for` loop | Replace the commented placeholder |
+### Copy this template for file-checking rules:
+
+⚠️ Note: This template has no PATTERN line by default, because some 
+file-checks need a pattern and some don't (see Step 2 above).
+
+- If you need a PATTERN → add `import re` and `PATTERN = re.compile(...)` 
+  at the top, then use `PATTERN.match(...)` inside the loop (see the 
+  Author Comment Header example below)
+- If you DON'T need a PATTERN → just write plain Python logic inside 
+  the loop (see the File Size Limit example below)
 
 ### Worked example — File Size Limit
 
