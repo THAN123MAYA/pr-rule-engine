@@ -13,7 +13,7 @@ RULES = [
     rule_sql_keywords,
     rule_plsql_pairs, 
     rule_intendation,
-    rule_author_comment<
+    rule_author_comment,
 ]
 
 
