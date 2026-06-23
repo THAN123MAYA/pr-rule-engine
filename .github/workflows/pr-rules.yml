@@ -48,6 +48,7 @@ jobs:
         run: |
           git config --global user.name "PR Rule Engine Bot"
           git config --global user.email "bot@pr-rule-engine.com"
+          git checkout ${{ github.event.pull_request.base.ref }}
           git add pr_check_log.csv
           git diff --staged --quiet || git commit -m "log: PR #${{ github.event.pull_request.number }} check results"
-          git push
+          git push origin ${{ github.event.pull_request.base.ref }}
