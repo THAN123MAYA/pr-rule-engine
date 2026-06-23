@@ -42,6 +42,11 @@ if __name__ == "__main__":
 
     output = run_all_rules(pr_payload)
 
+    # Print results
     print(json.dumps(output, indent=2))
+
+    # Save results to file so log_results.py can read it
+    with open("pr_results.json", "w") as f:
+        json.dump(output, f, indent=2)
 
     sys.exit(0 if output["passed"] else 1)
