@@ -1,0 +1,8 @@
+PR Number,PR Title,Branch,Author,Rule,Result,Message,Timestamp
+15,feat: added a new file,test-branch2007,THAN123MAYA,pr-title-format,PASS,✅ PR title is valid: 'feat: added a new file',2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,branch_name,FAIL,❌ Failed: 'test-branch2007',2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,sql-keyword-case,PASS,✅ All SQL keywords are correctly UPPERCASE,2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,plsql-structure-pairs,PASS,✅ All PL/SQL structure pairs are correctly matched,2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,plsql-style-checker,PASS,✅ PL/SQL style is correct ✔ Comma formatting is valid ✔ Parameters are properly formatted ✔ Indentation is correct ✔ BEGIN placement is correct,2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,author-comment-header,PASS,✅ All SQL files have an author comment,2026-06-23 12:03:03
+15,feat: added a new file,test-branch2007,THAN123MAYA,OVERALL,FAIL,"5 of 6 rules passed, 1 failed",2026-06-23 12:03:03
