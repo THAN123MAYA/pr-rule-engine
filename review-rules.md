@@ -51,6 +51,43 @@ You do NOT need to touch anything else. ✅
 
 ---
 
+## ✨ Don't want to write any code? Generate it with AI
+
+If you don't know Python or just want to move faster, use Claude AI to generate your rule file instantly — for free, no account needed.
+
+**How it works:**
+
+1. Click the link below to open Claude
+2. Copy and paste the prompt into Claude
+3. Replace `[describe your rule here]` with your rule in plain English
+4. Copy the generated file → paste it into your `rules/` folder
+
+> 🤖 **[Open Claude →](https://claude.ai/new)**
+
+**Copy this prompt into Claude:**
+
+```
+Generate a complete rule_xxx.py file for this rule: [describe your rule here].
+
+The file should follow this structure:
+- A RULE_NAME variable (kebab-case string)
+- A check(pr: dict) function that loops through pr.get("files", [])
+- Each file has "filename" and "content" fields
+- Return {"rule": RULE_NAME, "passed": True/False, "message": "..."}
+
+Return only the complete Python file, nothing else.
+```
+
+**Example rules you can describe:**
+- *"No file should have more than 300 lines"*
+- *"PR title must start with feat, fix, or docs"*
+- *"Every SQL file must start with an author comment"*
+- *"Branch name should only use lowercase letters and hyphens"*
+
+> ⚠️ After generating the file, still follow Step 4 (register in `runner.py`) and Step 5 (add tests). Those steps are always required.
+
+---
+
 ## Step 1: Create your rule file
 
 1. Go to the `rules/` folder
